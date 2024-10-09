@@ -1,8 +1,6 @@
 from flask import Flask, request, render_template, send_file, jsonify
 import os
 import yt_dlp
-import time
-import threading
 
 app = Flask(__name__)
 
@@ -38,17 +36,23 @@ def check():
             formats = info_dict.get('formats', [])
             available_formats = []
 
-            desired_resolutions = ['1440', '1080', '720', '480', '360', '240']
+            # Desired resolutions to filter
+            desired_resolutions = ['240', '360', '480', '720', '1080']
+            seen_formats = set()  # To avoid duplicates
+
             for f in formats:
                 if 'height' in f and str(f['height']) in desired_resolutions:
-                    format_info = {
-                        'format_id': f['format_id'],
-                        'height': f.get('height', 'N/A'),
-                        'width': f.get('width', 'N/A'),
-                        'filesize': f.get('filesize', f.get('filesize_approx', 'N/A')),
-                        'ext': f.get('ext', 'N/A'),
-                    }
-                    available_formats.append(format_info)
+                    # Ensure each format is added only once
+                    if f['format_id'] not in seen_formats:
+                        format_info = {
+                            'format_id': f['format_id'],
+                            'height': f.get('height', 'N/A'),
+                            'width': f.get('width', 'N/A'),
+                            'filesize': f.get('filesize', f.get('filesize_approx', 'N/A')),
+                            'ext': f.get('ext', 'N/A'),
+                        }
+                        available_formats.append(format_info)
+                        seen_formats.add(f['format_id'])  # Mark format as seen
 
             # Add MP3 format option
             available_formats.append({
