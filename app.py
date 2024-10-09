@@ -91,7 +91,10 @@ def download():
             return send_file(ydl.prepare_filename(ydl.extract_info(url)), as_attachment=True)
 
     except Exception as e:
-        return str(e), 500
+        # Log the error for debugging
+        print(f"Error during download: {str(e)}")
+        # Return a user-friendly message
+        return "An error occurred while downloading the video. Please try again later.", 500
 
 @app.route('/progress')
 def progress():
