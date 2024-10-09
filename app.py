@@ -18,7 +18,7 @@ def download():
     # Set up options for yt-dlp
     ydl_opts = {
         'format': 'best',
-        'outtmpl': 'downloads/%(title)s.%(ext)s',
+        'outtmpl': 'downloads/%(title)s.%(ext)s',  # Ensure it uses the 'downloads' folder
         'noplaylist': True,
     }
 
@@ -28,7 +28,7 @@ def download():
             filename = ydl.prepare_filename(info_dict)
 
             # Check if the file exists and has been completely downloaded
-            for _ in range(5):
+            for _ in range(5):  # Retry for 5 seconds to check if file is ready
                 if os.path.exists(filename):
                     send_file(filename, as_attachment=True)
                     return redirect(url_for('index'))  # Redirect to homepage after downloading
@@ -39,6 +39,6 @@ def download():
         return str(e), 500
 
 if __name__ == '__main__':
-    if not os.path.exists('downloads'):
+    if not os.path.exists('downloads'):  # Ensure the 'downloads' folder exists
         os.makedirs('downloads')
     app.run(debug=True)
