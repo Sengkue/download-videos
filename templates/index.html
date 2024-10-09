@@ -5,14 +5,163 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>YouTube Video Downloader</title>
+    <style>
+        /* Spinner and progress bar styles */
+        .spinner {
+            display: none;
+            margin: 20px auto;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #progressContainer {
+            display: none;
+            width: 100%;
+            background-color: #f3f3f3;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        #progressBar {
+            width: 0;
+            height: 20px;
+            background-color: #3498db;
+            border-radius: 5px;
+        }
+
+        #progressText {
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>YouTube Video Downloader</h1>
-        <form action="/check" method="post">
+        <form id="videoForm">
             <input type="text" name="url" placeholder="Enter YouTube video URL" required>
-            <button type="submit">Check Size</button>
+            <button type="submit">Check Formats</button>
         </form>
+
+        <div id="formatSelection" style="display: none;">
+            <h2>Available Formats:</h2>
+            <form action="/download" method="post" id="downloadForm">
+                <input type="hidden" name="url" id="hiddenUrl" value="">
+                <select name="format_id" required>
+                    <option value="">Select a format</option>
+                </select>
+                <button type="submit" id="downloadButton">Download Video</button>
+            </form>
+
+            <div class="spinner" id="loadingSpinner"></div>
+            <div id="progressContainer">
+                <div id="progressBar"></div>
+                <div id="progressText">0%</div>
+            </div>
+        </div>
+
+        <a href="#" id="backLink" style="display: none;">Go Back</a>
     </div>
+
+    <script>
+        const videoForm = document.getElementById('videoForm');
+        const formatSelection = document.getElementById('formatSelection');
+        const downloadForm = document.getElementById('downloadForm');
+        const downloadButton = document.getElementById('downloadButton');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const backLink = document.getElementById('backLink');
+
+        videoForm.onsubmit = function(event) {
+            event.preventDefault();
+            const url = event.target.url.value;
+
+            // Check formats via AJAX
+            fetch('/check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: url }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Error fetching formats');
+                }
+            })
+            .then(data => {
+                const select = downloadForm.querySelector('select[name="format_id"]');
+                select.innerHTML = '<option value="">Select a format</option>'; // Clear previous options
+
+                // Populate formats in the dropdown
+                data.formats.forEach(format => {
+                    const option = document.createElement('option');
+                    option.value = format.format_id;
+                    option.textContent = format.height !== 'Audio' 
+                        ? `${format.height}p: ${format.width}w x ${format.height}h (Approx. ${format.filesize} bytes, ${format.ext})`
+                        : `Audio (MP3)`;
+                    select.appendChild(option);
+                });
+
+                // Show format selection and hide the URL form
+                hiddenUrl.value = url; // Set hidden URL field
+                formatSelection.style.display = 'block';
+                videoForm.style.display = 'none';
+                backLink.style.display = 'inline'; // Show back link
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        };
+
+        downloadForm.onsubmit = function() {
+            loadingSpinner.style.display = 'block';
+            progressContainer.style.display = 'block';
+            downloadButton.disabled = true; // Disable button to prevent multiple submissions
+
+            // Start the progress update loop
+            const updateProgress = setInterval(() => {
+                fetch('/progress')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.percent !== undefined) {
+                            const percent = data.percent.toFixed(2);
+                            progressBar.style.width = percent + '%';
+                            progressText.innerText = percent + '%';
+
+                            // Stop updating when download is complete
+                            if (percent >= 100) {
+                                clearInterval(updateProgress);
+                                loadingSpinner.style.display = 'none';
+                                downloadButton.disabled = false; // Re-enable the button
+                            }
+                        }
+                    });
+            }, 1000); // Update every second
+        };
+
+        backLink.onclick = function(event) {
+            event.preventDefault();
+            formatSelection.style.display = 'none';
+            videoForm.style.display = 'block';
+            backLink.style.display = 'none'; // Hide back link
+            progressBar.style.width = '0%'; // Reset progress bar
+            progressText.innerText = '0%'; // Reset progress text
+        };
+    </script>
 </body>
 </html>
