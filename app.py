@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, send_file, redirect, url_for, jsonify
+from flask import Flask, request, render_template, send_file, redirect, url_for
 import os
 import yt_dlp
 import time
@@ -25,17 +25,25 @@ def check():
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=False)  # Only extract info
+            
+            # Extract available formats
+            formats = info_dict.get('formats', [])
             title = info_dict.get('title', 'Unknown Title')
-            size = info_dict.get('filesize') or info_dict.get('filesize_approx')  # Get size in bytes
 
-            # Convert size to a more readable format (MB)
-            if size is not None:
-                size_mb = size / (1024 * 1024)  # Convert bytes to megabytes
-                size_info = f"Size: {size_mb:.2f} MB"
-            else:
-                size_info = "Size: Unknown"
+            # Prepare a list of available formats with size and resolution
+            available_formats = []
+            for f in formats:
+                if 'height' in f and 'width' in f:
+                    format_info = {
+                        'format_id': f['format_id'],
+                        'height': f.get('height', 'N/A'),
+                        'width': f.get('width', 'N/A'),
+                        'filesize': f.get('filesize', f.get('filesize_approx', 'N/A')),  # Get size in bytes
+                        'ext': f.get('ext', 'N/A'),
+                    }
+                    available_formats.append(format_info)
 
-            return render_template('check.html', title=title, size=size_info, url=url)  # Render check page
+            return render_template('check.html', title=title, formats=available_formats, url=url)
 
     except Exception as e:
         return str(e), 500
@@ -43,12 +51,13 @@ def check():
 @app.route('/download', methods=['POST'])
 def download():
     url = request.form.get('url')
-    if not url:
-        return "No URL provided", 400
+    format_id = request.form.get('format_id')
+    if not url or not format_id:
+        return "No URL or format ID provided", 400
 
-    # Set up options for yt-dlp
+    # Set up options for yt-dlp to download the selected format
     ydl_opts = {
-        'format': 'best',
+        'format': format_id,  # Use the selected format ID
         'outtmpl': 'downloads/%(title)s.%(ext)s',
         'noplaylist': True,
     }
