@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Video Info</title>
+    <style>
+        /* Spinner CSS */
+        .spinner {
+            display: none;
+            margin: 20px auto;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3; /* Light gray */
+            border-top: 5px solid #3498db; /* Blue */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -12,7 +30,7 @@
         <p><strong>Title:</strong> {{ title }}</p>
 
         <h2>Available Formats:</h2>
-        <form action="/download" method="post">
+        <form action="/download" method="post" id="downloadForm">
             <input type="hidden" name="url" value="{{ url }}">
             <select name="format_id" required>
                 <option value="">Select a format</option>
@@ -27,10 +45,19 @@
                     </option>
                 {% endfor %}
             </select>
-            <button type="submit">Download Video</button>
+            <button type="submit" id="downloadButton">Download Video</button>
         </form>
 
+        <div class="spinner" id="loadingSpinner"></div>
         <a href="{{ url_for('index') }}">Go Back</a>
     </div>
+
+    <script>
+        // Show the spinner when the form is submitted
+        document.getElementById('downloadForm').onsubmit = function() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('downloadButton').disabled = true; // Disable the button to prevent multiple clicks
+        };
+    </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, send_file, redirect, url_for
+from flask import Flask, request, render_template, send_file, redirect, url_for, jsonify
 import os
 import yt_dlp
 import time
@@ -25,22 +25,19 @@ def check():
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=False)  # Only extract info
-            
-            # Extract available formats
-            formats = info_dict.get('formats', [])
             title = info_dict.get('title', 'Unknown Title')
-
-            # Prepare a list of selected formats
+            formats = info_dict.get('formats', [])
             available_formats = []
-            desired_resolutions = ['1440', '1080', '720', '480', '360', '240']  # Desired resolutions
 
+            # Filter formats based on desired resolutions and add MP3 option
+            desired_resolutions = ['1440', '1080', '720', '480', '360', '240']
             for f in formats:
                 if 'height' in f and str(f['height']) in desired_resolutions:
                     format_info = {
                         'format_id': f['format_id'],
                         'height': f.get('height', 'N/A'),
                         'width': f.get('width', 'N/A'),
-                        'filesize': f.get('filesize', f.get('filesize_approx', 'N/A')),  # Get size in bytes
+                        'filesize': f.get('filesize', f.get('filesize_approx', 'N/A')),  # Size in bytes
                         'ext': f.get('ext', 'N/A'),
                     }
                     available_formats.append(format_info)
