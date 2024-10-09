@@ -1,8 +1,6 @@
 from flask import Flask, request, render_template, send_file, jsonify
 import os
 import yt_dlp
-import time
-import threading
 
 app = Flask(__name__)
 
@@ -39,10 +37,9 @@ def check():
             available_formats = []
 
             # Specify the desired resolutions
-            desired_resolutions = ['240', '360', '480', '720']
+            desired_resolutions = ['240', '360', '480', '720', '1080']
 
             for f in formats:
-                # Only include formats that have a height in desired resolutions
                 if 'height' in f and str(f['height']) in desired_resolutions:
                     if f.get('filesize') is not None or f.get('filesize_approx') is not None:
                         format_info = {
@@ -78,11 +75,15 @@ def download():
     if not url or not format_id:
         return "No URL or format ID provided", 400
 
+    # Change to resume downloads and retry options
     ydl_opts = {
         'format': format_id,
         'outtmpl': 'downloads/%(title)s.%(ext)s',
         'noplaylist': True,
         'progress_hooks': [progress_hook],  # Use progress hook
+        'retries': 10,  # Increase retry attempts
+        'ratelimit': None,  # Avoid rate limiting
+        'socket_timeout': 30,  # Timeout after 30 seconds
     }
 
     try:
