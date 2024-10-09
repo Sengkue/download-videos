@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Info</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>YouTube Video Downloader</title>
 </head>
 <body>
     <div class="container">
-        <h1>Video Information</h1>
-        <p><strong>Title:</strong> {{ title }}</p>
-        <p><strong>{{ size }}</strong></p>
-        <form action="/download" method="post">
-            <input type="hidden" name="url" value="{{ url }}">
-            <button type="submit">Download Video</button>
+        <h1>YouTube Video Downloader</h1>
+        <form action="/check" method="post">
+            <input type="text" name="url" placeholder="Enter YouTube video URL" required>
+            <button type="submit">Check Size</button>
         </form>
-        <a href="{{ url_for('index') }}">Go Back</a>
     </div>
 </body>
 </html>
