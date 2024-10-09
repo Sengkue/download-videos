@@ -36,36 +36,32 @@ def check():
             formats = info_dict.get('formats', [])
             available_formats = []
 
-            # Check for video formats
-            video_formats = []
-            audio_formats = []
+            # Specify the desired resolutions
+            desired_resolutions = ['240', '360', '480', '720', '1080']
 
             for f in formats:
-                if 'video' in f['format']:
-                    video_formats.append({
-                        'format_id': f['format_id'],
-                        'ext': f.get('ext', 'N/A'),
-                    })
-                elif 'audio' in f['format']:
-                    audio_formats.append({
-                        'format_id': f['format_id'],
-                        'ext': f.get('ext', 'N/A'),
-                    })
+                if 'height' in f and str(f['height']) in desired_resolutions:
+                    # Only include formats that have a valid filesize
+                    if f.get('filesize') is not None or f.get('filesize_approx') is not None:
+                        format_info = {
+                            'format_id': f['format_id'],
+                            'height': f['height'],
+                            'width': f.get('width', 'N/A'),
+                            'filesize': f.get('filesize', f.get('filesize_approx', 'N/A')),
+                            'ext': f.get('ext', 'N/A'),
+                        }
+                        available_formats.append(format_info)
 
-            # Add only one video option and one audio option
-            if video_formats:
-                available_formats.append({
-                    'format_id': video_formats[0]['format_id'],
-                    'ext': video_formats[0]['ext'],
-                })
+            # Add MP3 format option
+            available_formats.append({
+                'format_id': 'bestaudio[ext=m4a]',
+                'height': 'Audio',
+                'width': 'N/A',
+                'filesize': 'N/A',
+                'ext': 'mp3',
+            })
 
-            if audio_formats:
-                available_formats.append({
-                    'format_id': audio_formats[0]['format_id'],
-                    'ext': audio_formats[0]['ext'],
-                })
-
-            return render_template('index.html', title=title, formats=available_formats, url=url)
+            return render_template('check.html', title=title, formats=available_formats, url=url)
 
     except Exception as e:
         return str(e), 500
