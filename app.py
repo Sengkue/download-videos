@@ -33,11 +33,12 @@ def check():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=False)
             title = info_dict.get('title', 'Unknown Title')
+            formats = info_dict.get('formats', [])
             available_formats = []
 
-            # Add MP4 video format option (with audio)
+            # Add MP4 video format option with sound
             available_formats.append({
-                'format_id': 'bestvideo+bestaudio[ext=m4a]',
+                'format_id': 'bestvideo+bestaudio[ext=mp4]',
                 'type': 'Video (MP4)',
             })
 
