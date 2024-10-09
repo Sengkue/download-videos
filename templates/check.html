@@ -18,16 +18,12 @@
                 <option value="">Select a format</option>
                 {% for format in formats %}
                     <option value="{{ format.format_id }}">
-                        {% if format.height != 'Audio' %}
-                            {{ format.height }}p: {{ format.width }}w x {{ format.height }}h 
-                            ({{ format.filesize|default('Unknown Size') }} bytes, {{ format.ext }})
-                        {% else %}
-                            MP3 Audio (M4A, will convert to MP3)
-                        {% endif %}
+                        {{ format.height }}p: {{ format.width }}w x {{ format.height }}h 
+                        ({{ format.filesize|default('Unknown Size') }} bytes, {{ format.ext }})
                     </option>
                 {% endfor %}
             </select>
-            <button type="submit">Download</button>
+            <button type="submit">Download Video</button>
         </form>
 
         <a href="{{ url_for('index') }}">Go Back</a>
