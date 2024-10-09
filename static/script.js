@@ -2,6 +2,8 @@ document.getElementById('downloadForm').addEventListener('submit', function(even
     event.preventDefault();
     const url = document.getElementById('videoUrl').value;
 
+    console.log("Submitting URL:", url);  // Debugging output
+
     fetch('/download', {
         method: 'POST',
         headers: {
