@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, send_file
+from flask import Flask, request, render_template, send_file, redirect, url_for
 import os
 import yt_dlp
 import time
@@ -28,11 +28,12 @@ def download():
             filename = ydl.prepare_filename(info_dict)
 
             # Check if the file exists and has been completely downloaded
-            for _ in range(5):  # Retry for a few seconds if needed
+            for _ in range(5):
                 if os.path.exists(filename):
-                    return send_file(filename, as_attachment=True)
-                time.sleep(1)  # Wait for a second before retrying
-            
+                    send_file(filename, as_attachment=True)
+                    return redirect(url_for('index'))  # Redirect to homepage after downloading
+                time.sleep(1)
+
             return "File not found after download", 500
     except Exception as e:
         return str(e), 500
