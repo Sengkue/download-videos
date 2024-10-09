@@ -3,50 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Available Formats for {{ title }}</title>
-    <script>
-        function updateProgress() {
-            fetch('/progress')
-                .then(response => response.json())
-                .then(data => {
-                    const progressBar = document.getElementById('progress');
-                    if (data.percent) {
-                        progressBar.style.width = data.percent + '%';
-                        progressBar.innerText = Math.round(data.percent) + '%';
-                    }
-                    setTimeout(updateProgress, 1000);
-                });
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Video Info</title>
+    <style>
+        /* Spinner and progress bar styles */
+        .spinner {
+            display: none;
+            margin: 20px auto;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            updateProgress();
-        });
-    </script>
-    <style>
-        #progress {
-            height: 30px;
-            background-color: green;
-            width: 0%;
-            color: white;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #progressContainer {
+            display: none;
+            width: 100%;
+            background-color: #f3f3f3;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        #progressBar {
+            width: 0;
+            height: 20px;
+            background-color: #3498db;
+            border-radius: 5px;
+        }
+
+        #progressText {
             text-align: center;
+            font-weight: bold;
+            color: #333;
         }
     </style>
 </head>
 <body>
-    <h1>Available Formats for {{ title }}</h1>
-    <form action="/download" method="post">
-        <input type="hidden" name="url" value="{{ url }}">
-        <select name="format_id" required>
-            {% for format in formats %}
-                <option value="{{ format.format_id }}">
-                    {{ format.height }}p: {{ format.width }}w x {{ format.height }}h ({{ format.filesize }})
-                </option>
-            {% endfor %}
-        </select>
-        <button type="submit">Download</button>
-    </form>
-    <div>
-        <div id="progress">0%</div>
+    <div class="container">
+        <h1>Video Information</h1>
+        <p><strong>Title:</strong> {{ title }}</p>
+
+        <h2>Available Formats:</h2>
+        <form action="/download" method="post" id="downloadForm">
+            <input type="hidden" name="url" value="{{ url }}">
+            <select name="format_id" required>
+                <option value="">Select a format</option>
+                {% for format in formats %}
+                    <option value="{{ format.format_id }}">
+                        {% if format.height != 'Audio' %}
+                            {{ format.height }}p: {{ format.width }}w x {{ format.height }}h 
+                            ({{ format.filesize|default('Unknown Size') }} bytes, {{ format.ext }})
+                        {% else %}
+                            {{ format.ext | upper }} Audio (MP3)
+                        {% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit" id="downloadButton">Download Video</button>
+        </form>
+
+        <div class="spinner" id="loadingSpinner"></div>
+        <div id="progressContainer">
+            <div id="progressBar"></div>
+            <div id="progressText">0%</div>
+        </div>
+
+        <a href="{{ url_for('index') }}">Go Back</a>
     </div>
+
+    <script>
+        document.getElementById('downloadForm').onsubmit = function() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('downloadButton').disabled = true; // Disable the button to prevent multiple clicks
+
+            // Start the progress update loop
+            const updateProgress = setInterval(() => {
+                fetch('/progress')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.percent !== undefined) {
+                            const percent = data.percent.toFixed(2);
+                            document.getElementById('progressBar').style.width = percent + '%';
+                            document.getElementById('progressText').innerText = percent + '%';
+
+                            // Stop updating when download is complete
+                            if (percent >= 100) {
+                                clearInterval(updateProgress);
+                                document.getElementById('loadingSpinner').style.display = 'none';
+                                document.getElementById('downloadButton').disabled = false; // Re-enable the button
+                            }
+                        }
+                    });
+            }, 1000); // Update every second
+        };
+    </script>
 </body>
 </html>

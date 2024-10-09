@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>YouTube Video Downloader</title>
 </head>
 <body>
-    <div>
+    <div class="container">
         <h1>YouTube Video Downloader</h1>
         <form action="/check" method="post">
             <input type="text" name="url" placeholder="Enter YouTube video URL" required>
-            <button type="submit">Check Formats</button>
+            <button type="submit">Check Size</button>
         </form>
     </div>
 </body>
