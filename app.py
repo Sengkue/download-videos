@@ -81,8 +81,8 @@ def download():
             return send_file(filename, as_attachment=True)
 
     except Exception as e:
-        print(f"Error during download: {str(e)}")
-        return "An error occurred while downloading the video. Please try again later.", 500
+        print(f"Error during download: {str(e)}")  # Log the error
+        return f"An error occurred while downloading the video: {str(e)}. Please try again later.", 500
 
 @app.route('/progress')
 def progress():
