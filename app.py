@@ -1,22 +1,3 @@
-from flask import Flask, request, render_template, send_file, jsonify
-import os
-import yt_dlp
-
-app = Flask(__name__)
-
-# Global variable to hold the download progress
-download_progress = {}
-
-def progress_hook(d):
-    if d['status'] == 'downloading':
-        download_progress['percent'] = d['downloaded_bytes'] / d['total_bytes'] * 100
-    elif d['status'] == 'finished':
-        download_progress['percent'] = 100
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
 @app.route('/check', methods=['POST'])
 def check():
     url = request.form.get('url')
@@ -38,12 +19,13 @@ def check():
 
             # Desired resolutions to filter
             desired_resolutions = ['240', '360', '480', '720', '1080']
-            seen_formats = set()  # To avoid duplicates
+            seen_resolutions = set()  # To avoid duplicates by resolution
 
             for f in formats:
+                # Only add formats that match desired resolutions
                 if 'height' in f and str(f['height']) in desired_resolutions:
-                    # Ensure each format is added only once
-                    if f['format_id'] not in seen_formats:
+                    resolution_key = str(f['height'])  # Use height as the key for uniqueness
+                    if resolution_key not in seen_resolutions:
                         format_info = {
                             'format_id': f['format_id'],
                             'height': f.get('height', 'N/A'),
@@ -52,7 +34,7 @@ def check():
                             'ext': f.get('ext', 'N/A'),
                         }
                         available_formats.append(format_info)
-                        seen_formats.add(f['format_id'])  # Mark format as seen
+                        seen_resolutions.add(resolution_key)  # Mark this resolution as seen
 
             # Add MP3 format option
             available_formats.append({
@@ -67,37 +49,3 @@ def check():
 
     except Exception as e:
         return str(e), 500
-
-@app.route('/download', methods=['POST'])
-def download():
-    global download_progress
-    download_progress = {}  # Reset progress
-
-    url = request.form.get('url')
-    format_id = request.form.get('format_id')
-    if not url or not format_id:
-        return "No URL or format ID provided", 400
-
-    ydl_opts = {
-        'format': format_id,
-        'outtmpl': 'downloads/%(title)s.%(ext)s',
-        'noplaylist': True,
-        'progress_hooks': [progress_hook],  # Use progress hook
-    }
-
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])  # This will block until download is finished
-            return send_file(ydl.prepare_filename(ydl.extract_info(url)), as_attachment=True)
-
-    except Exception as e:
-        return str(e), 500
-
-@app.route('/progress')
-def progress():
-    return jsonify(download_progress)
-
-if __name__ == '__main__':
-    if not os.path.exists('downloads'):
-        os.makedirs('downloads')
-    app.run(debug=True)
