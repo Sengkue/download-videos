@@ -10,11 +10,22 @@
     <div class="container">
         <h1>Video Information</h1>
         <p><strong>Title:</strong> {{ title }}</p>
-        <p><strong>{{ size }}</strong></p>
+
+        <h2>Available Formats:</h2>
         <form action="/download" method="post">
             <input type="hidden" name="url" value="{{ url }}">
+            <select name="format_id" required>
+                <option value="">Select a format</option>
+                {% for format in formats %}
+                    <option value="{{ format.format_id }}">
+                        {{ format.height }}p: {{ format.width }}w x {{ format.height }}h 
+                        ({{ format.filesize|default('Unknown Size') }} bytes, {{ format.ext }})
+                    </option>
+                {% endfor %}
+            </select>
             <button type="submit">Download Video</button>
         </form>
+
         <a href="{{ url_for('index') }}">Go Back</a>
     </div>
 </body>
