@@ -39,7 +39,7 @@ def check():
             available_formats = []
 
             # Specify the desired resolutions
-            desired_resolutions = ['240', '360', '480', '720', '1080']
+            desired_resolutions = ['240', '360', '480', '720']
 
             for f in formats:
                 # Only include formats that have a height in desired resolutions
