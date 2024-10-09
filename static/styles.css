@@ -3,11 +3,18 @@ body {
     text-align: center;
     padding: 20px;
 }
+
 input {
     width: 300px;
     padding: 10px;
     margin-bottom: 10px;
 }
+
 button {
     padding: 10px 20px;
+}
+
+#message {
+    margin-top: 20px;
+    color: red;
 }

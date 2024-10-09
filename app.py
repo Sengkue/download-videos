@@ -11,10 +11,13 @@ def index():
 @app.route('/download', methods=['POST'])
 def download():
     url = request.form['url']
-    yt = YouTube(url)
-    video = yt.streams.get_highest_resolution()
-    video.download(output_path='downloads')
-    return send_file(f'downloads/{video.default_filename}', as_attachment=True)
+    try:
+        yt = YouTube(url)
+        video = yt.streams.get_highest_resolution()
+        video.download(output_path='downloads')
+        return send_file(f'downloads/{video.default_filename}', as_attachment=True)
+    except Exception as e:
+        return str(e), 400  # Return the error message
 
 if __name__ == '__main__':
     if not os.path.exists('downloads'):
