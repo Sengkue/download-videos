@@ -8,6 +8,7 @@ app = Flask(__name__)
 download_progress = {}
 
 def progress_hook(d):
+    """Hook to monitor download progress."""
     if d['status'] == 'downloading':
         download_progress['percent'] = d['downloaded_bytes'] / d['total_bytes'] * 100
     elif d['status'] == 'finished':
@@ -15,10 +16,12 @@ def progress_hook(d):
 
 @app.route('/')
 def index():
+    """Render the index page."""
     return render_template('index.html')
 
 @app.route('/check', methods=['POST'])
 def check():
+    """Check available formats for the given video URL."""
     url = request.form.get('url')
     if not url:
         return "No URL provided", 400
@@ -40,21 +43,20 @@ def check():
             desired_resolutions = ['240', '360', '480', '720', '1080']
 
             for f in formats:
-                # Filter out formats without audio
-                has_audio = 'audio' in f and f['acodec'] != 'none'
-                if 'height' in f and str(f['height']) in desired_resolutions and has_audio:
-                    # Only include formats that have a valid filesize
+                # Only include formats that have a valid filesize and include audio
+                if 'height' in f and str(f['height']) in desired_resolutions:
                     if f.get('filesize') is not None or f.get('filesize_approx') is not None:
-                        format_info = {
-                            'format_id': f['format_id'],
-                            'height': f['height'],
-                            'width': f.get('width', 'N/A'),
-                            'filesize': f.get('filesize', f.get('filesize_approx', 'N/A')),
-                            'ext': f.get('ext', 'N/A'),
-                        }
-                        available_formats.append(format_info)
+                        if f.get('acodec') != 'none':  # Check if the format has audio
+                            format_info = {
+                                'format_id': f['format_id'],
+                                'height': f['height'],
+                                'width': f.get('width', 'N/A'),
+                                'filesize': f.get('filesize', f.get('filesize_approx', 'N/A')),
+                                'ext': f.get('ext', 'N/A'),
+                            }
+                            available_formats.append(format_info)
 
-            # Add MP3 format option
+            # Add MP3 format option explicitly for audio only
             available_formats.append({
                 'format_id': 'bestaudio[ext=m4a]',
                 'height': 'Audio',
@@ -70,6 +72,7 @@ def check():
 
 @app.route('/download', methods=['POST'])
 def download():
+    """Download the selected video format."""
     global download_progress
     download_progress = {}  # Reset progress
 
@@ -120,6 +123,7 @@ def download():
 
 @app.route('/progress')
 def progress():
+    """Get the current download progress."""
     return jsonify(download_progress)
 
 if __name__ == '__main__':
