@@ -36,34 +36,17 @@ def check():
             formats = info_dict.get('formats', [])
             available_formats = []
 
-            # Check for video formats
-            video_formats = []
-            audio_formats = []
+            # Add MP4 video format option
+            available_formats.append({
+                'format_id': 'bestvideo[ext=mp4]',
+                'type': 'Video (MP4)',
+            })
 
-            for f in formats:
-                if 'video' in f['format']:
-                    video_formats.append({
-                        'format_id': f['format_id'],
-                        'ext': f.get('ext', 'N/A'),
-                    })
-                elif 'audio' in f['format']:
-                    audio_formats.append({
-                        'format_id': f['format_id'],
-                        'ext': f.get('ext', 'N/A'),
-                    })
-
-            # Add only one video option and one audio option
-            if video_formats:
-                available_formats.append({
-                    'format_id': video_formats[0]['format_id'],
-                    'ext': video_formats[0]['ext'],
-                })
-
-            if audio_formats:
-                available_formats.append({
-                    'format_id': audio_formats[0]['format_id'],
-                    'ext': audio_formats[0]['ext'],
-                })
+            # Add MP3 audio format option
+            available_formats.append({
+                'format_id': 'bestaudio[ext=m4a]',
+                'type': 'Audio (MP3)',
+            })
 
             return render_template('index.html', title=title, formats=available_formats, url=url)
 
@@ -99,26 +82,7 @@ def download():
 
     except Exception as e:
         print(f"Error during download: {str(e)}")
-        
-        # Attempt to fallback to the best available format
-        fallback_ydl_opts = {
-            'format': 'best',
-            'outtmpl': 'downloads/%(title)s.%(ext)s',
-            'noplaylist': True,
-            'progress_hooks': [progress_hook],
-            'retries': 5,
-            'socket_timeout': 30,
-        }
-
-        try:
-            with yt_dlp.YoutubeDL(fallback_ydl_opts) as ydl:
-                ydl.download([url])
-                filename = ydl.prepare_filename(ydl.extract_info(url))
-                return send_file(filename, as_attachment=True)
-
-        except Exception as fallback_error:
-            print(f"Fallback download error: {str(fallback_error)}")
-            return "An error occurred while downloading the video. Please try again later.", 500
+        return "An error occurred while downloading the video. Please try again later.", 500
 
 @app.route('/progress')
 def progress():
