@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, send_file
 import os
 import yt_dlp
+import time
 
 app = Flask(__name__)
 
@@ -25,7 +26,14 @@ def download():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=True)
             filename = ydl.prepare_filename(info_dict)
-            return send_file(filename, as_attachment=True)
+
+            # Check if the file exists and has been completely downloaded
+            for _ in range(5):  # Retry for a few seconds if needed
+                if os.path.exists(filename):
+                    return send_file(filename, as_attachment=True)
+                time.sleep(1)  # Wait for a second before retrying
+            
+            return "File not found after download", 500
     except Exception as e:
         return str(e), 500
 
