@@ -41,6 +41,7 @@ def check():
 
             for f in formats:
                 if 'height' in f and str(f['height']) in desired_resolutions:
+                    # Only include formats that have a valid filesize
                     if f.get('filesize') is not None or f.get('filesize_approx') is not None:
                         format_info = {
                             'format_id': f['format_id'],
@@ -75,27 +76,45 @@ def download():
     if not url or not format_id:
         return "No URL or format ID provided", 400
 
-    # Change to resume downloads and retry options
+    # Set up yt-dlp options
     ydl_opts = {
         'format': format_id,
         'outtmpl': 'downloads/%(title)s.%(ext)s',
         'noplaylist': True,
-        'progress_hooks': [progress_hook],  # Use progress hook
-        'retries': 10,  # Increase retry attempts
-        'ratelimit': None,  # Avoid rate limiting
+        'progress_hooks': [progress_hook],
+        'retries': 5,  # Retry up to 5 times
         'socket_timeout': 30,  # Timeout after 30 seconds
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])  # This will block until download is finished
-            return send_file(ydl.prepare_filename(ydl.extract_info(url)), as_attachment=True)
+            # Attempt to download the selected format
+            ydl.download([url])
+            filename = ydl.prepare_filename(ydl.extract_info(url))
+            return send_file(filename, as_attachment=True)
 
     except Exception as e:
-        # Log the error for debugging
         print(f"Error during download: {str(e)}")
-        # Return a user-friendly message
-        return "An error occurred while downloading the video. Please try again later.", 500
+        
+        # Attempt to fallback to the best available format
+        fallback_ydl_opts = {
+            'format': 'best',
+            'outtmpl': 'downloads/%(title)s.%(ext)s',
+            'noplaylist': True,
+            'progress_hooks': [progress_hook],
+            'retries': 5,
+            'socket_timeout': 30,
+        }
+
+        try:
+            with yt_dlp.YoutubeDL(fallback_ydl_opts) as ydl:
+                ydl.download([url])
+                filename = ydl.prepare_filename(ydl.extract_info(url))
+                return send_file(filename, as_attachment=True)
+
+        except Exception as fallback_error:
+            print(f"Fallback download error: {str(fallback_error)}")
+            return "An error occurred while downloading the video. Please try again later.", 500
 
 @app.route('/progress')
 def progress():
