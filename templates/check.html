@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Video Info</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Video Information</h1>
+        <p><strong>Title:</strong> {{ title }}</p>
+        <p><strong>{{ size }}</strong></p>
+        <form action="/download" method="post">
+            <input type="hidden" name="url" value="{{ url }}">
+            <button type="submit">Download Video</button>
+        </form>
+        <a href="{{ url_for('index') }}">Go Back</a>
+    </div>
+</body>
+</html>
