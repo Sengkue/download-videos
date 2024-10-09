@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, send_file
+from flask import Flask, request, render_template, send_file, redirect, url_for
 import os
 import yt_dlp
 import time
@@ -34,7 +34,6 @@ def check():
             available_formats = []
             desired_resolutions = ['1440', '1080', '720', '480', '360', '240']  # Desired resolutions
 
-            # Add video formats based on desired resolutions
             for f in formats:
                 if 'height' in f and str(f['height']) in desired_resolutions:
                     format_info = {
@@ -46,7 +45,7 @@ def check():
                     }
                     available_formats.append(format_info)
 
-            # Add explicit MP3 option
+            # Add MP3 format option
             available_formats.append({
                 'format_id': 'bestaudio[ext=m4a]',
                 'height': 'Audio',

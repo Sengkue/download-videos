@@ -22,12 +22,12 @@
                             {{ format.height }}p: {{ format.width }}w x {{ format.height }}h 
                             ({{ format.filesize|default('Unknown Size') }} bytes, {{ format.ext }})
                         {% else %}
-                            MP3 Audio (M4A, will convert to MP3)
+                            {{ format.ext | upper }} Audio (MP3)
                         {% endif %}
                     </option>
                 {% endfor %}
             </select>
-            <button type="submit">Download</button>
+            <button type="submit">Download Video</button>
         </form>
 
         <a href="{{ url_for('index') }}">Go Back</a>
