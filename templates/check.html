@@ -18,8 +18,12 @@
                 <option value="">Select a format</option>
                 {% for format in formats %}
                     <option value="{{ format.format_id }}">
-                        {{ format.height }}p: {{ format.width }}w x {{ format.height }}h 
-                        ({{ format.filesize|default('Unknown Size') }} bytes, {{ format.ext }})
+                        {% if format.height != 'Audio' %}
+                            {{ format.height }}p: {{ format.width }}w x {{ format.height }}h 
+                            ({{ format.filesize|default('Unknown Size') }} bytes, {{ format.ext }})
+                        {% else %}
+                            {{ format.ext | upper }} Audio (MP3)
+                        {% endif %}
                     </option>
                 {% endfor %}
             </select>

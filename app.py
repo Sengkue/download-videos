@@ -30,10 +30,12 @@ def check():
             formats = info_dict.get('formats', [])
             title = info_dict.get('title', 'Unknown Title')
 
-            # Prepare a list of available formats with size and resolution
+            # Prepare a list of selected formats
             available_formats = []
+            desired_resolutions = ['1440', '1080', '720', '480', '360', '240']  # Desired resolutions
+
             for f in formats:
-                if 'height' in f and 'width' in f:
+                if 'height' in f and str(f['height']) in desired_resolutions:
                     format_info = {
                         'format_id': f['format_id'],
                         'height': f.get('height', 'N/A'),
@@ -42,6 +44,15 @@ def check():
                         'ext': f.get('ext', 'N/A'),
                     }
                     available_formats.append(format_info)
+
+            # Add MP3 format option
+            available_formats.append({
+                'format_id': 'bestaudio[ext=m4a]',
+                'height': 'Audio',
+                'width': 'N/A',
+                'filesize': 'N/A',  # Size is not available until download
+                'ext': 'mp3',
+            })
 
             return render_template('check.html', title=title, formats=available_formats, url=url)
 
