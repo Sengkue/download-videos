@@ -4,15 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>YouTube Video Downloader</title>
+    <title>Video Info</title>
 </head>
 <body>
     <div class="container">
-        <h1>YouTube Video Downloader</h1>
-        <form action="/check" method="post">
-            <input type="text" name="url" placeholder="Enter YouTube video URL" required>
-            <button type="submit">Check Size</button>
+        <h1>Video Information</h1>
+        <p><strong>Title:</strong> {{ title }}</p>
+
+        <h2>Available Formats:</h2>
+        <form action="/download" method="post">
+            <input type="hidden" name="url" value="{{ url }}">
+            <select name="format_id" required>
+                <option value="">Select a format</option>
+                {% for format in formats %}
+                    <option value="{{ format.format_id }}">
+                        {% if format.height != 'Audio' %}
+                            {{ format.height }}p: {{ format.width }}w x {{ format.height }}h 
+                            ({{ format.filesize|default('Unknown Size') }} bytes, {{ format.ext }})
+                        {% else %}
+                            MP3 Audio (M4A, will convert to MP3)
+                        {% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit">Download</button>
         </form>
+
+        <a href="{{ url_for('index') }}">Go Back</a>
     </div>
 </body>
 </html>
