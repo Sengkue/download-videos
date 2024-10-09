@@ -1,6 +1,6 @@
-from flask import Flask, request, send_file, render_template
-from pytube import YouTube
+from flask import Flask, request, render_template, send_file
 import os
+import yt_dlp
 
 app = Flask(__name__)
 
@@ -10,18 +10,24 @@ def index():
 
 @app.route('/download', methods=['POST'])
 def download():
-    url = request.form.get('url')  # Use get() to avoid KeyError
-    print(f"Received URL: {url}")  # Debugging output
+    url = request.form.get('url')
     if not url:
-        return "No URL provided", 400  # Return error if URL is missing
+        return "No URL provided", 400
+
+    # Set up options for yt-dlp
+    ydl_opts = {
+        'format': 'best',
+        'outtmpl': 'downloads/%(title)s.%(ext)s',
+        'noplaylist': True,
+    }
+
     try:
-        yt = YouTube(url)
-        video = yt.streams.get_highest_resolution()
-        video.download(output_path='downloads')
-        return send_file(f'downloads/{video.default_filename}', as_attachment=True)
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(url, download=True)
+            filename = ydl.prepare_filename(info_dict)
+            return send_file(filename, as_attachment=True)
     except Exception as e:
-        print(f"Error: {e}")  # Debugging output
-        return str(e), 400  # Return the error message
+        return str(e), 500
 
 if __name__ == '__main__':
     if not os.path.exists('downloads'):
