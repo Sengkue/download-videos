@@ -61,7 +61,7 @@ def check():
                 'ext': 'mp3',
             })
 
-            return render_template('check.html', title=title, formats=available_formats, url=url)
+            return render_template('index.html', title=title, formats=available_formats, url=url)
 
     except Exception as e:
         return str(e), 500
