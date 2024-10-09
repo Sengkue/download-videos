@@ -40,9 +40,7 @@ def check():
             desired_resolutions = ['240', '360', '480', '720', '1080']
 
             for f in formats:
-                # Only include formats that have both audio and video streams
-                if ('height' in f and str(f['height']) in desired_resolutions) and \
-                   ('acodec' in f and f['acodec'] != 'none'):  # Check for audio codec presence
+                if 'height' in f and str(f['height']) in desired_resolutions:
                     # Only include formats that have a valid filesize
                     if f.get('filesize') is not None or f.get('filesize_approx') is not None:
                         format_info = {
