@@ -55,6 +55,7 @@ input[type="text"]:focus {
     color: #FF0000; /* Red color for clear icon */
     cursor: pointer;
     transition: color 0.3s;
+    background-color: white;
 }
 
 .clear-icon:hover {
