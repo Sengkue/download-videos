@@ -5,99 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Video Downloader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background-color: white;
-            padding: 40px 60px;
-            box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-        }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        .input-container {
-            position: relative;
-            width: 100%;
-        }
-        input[type="text"] {
-            width: calc(100% - 50px); /* Adjusted for the icon width */
-            padding: 10px;
-            margin: 10px 0;
-            border: 2px solid #007BFF;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        input[type="text"]:focus {
-            border-color: #0056b3;
-            outline: none;
-        }
-        .paste-icon {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 18px;
-            color: #007BFF;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        .paste-icon:hover {
-            color: #0056b3;
-        }
-        button {
-            padding: 10px 25px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-        }
-        button:hover {
-            background-color: #0056b3;
-            transform: scale(1.05);
-        }
-        button:active {
-            transform: scale(0.95);
-        }
-        .error {
-            color: red;
-            margin-top: 15px;
-        }
-        .footer {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #555;
-        }
-        .fa {
-            margin-right: 5px;
-        }
-    </style>
-    <script>
-        function pasteLink() {
-            navigator.clipboard.readText().then(function(text) {
-                document.getElementById('video-url').value = text;
-            }).catch(function(err) {
-                console.error('Failed to read clipboard: ', err);
-            });
-        }
-    </script>
 </head>
 <body>
 
@@ -117,5 +26,6 @@
         <div class="footer">Powered by <a href="https://yt-dlp.org/" target="_blank">yt-dlp</a></div>
     </div>
 
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

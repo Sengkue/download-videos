@@ -1,44 +1,95 @@
+/* Save this file as /static/styles.css */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     margin: 0;
-    padding: 20px;
 }
 
 .container {
-    max-width: 600px;
-    margin: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    padding: 40px 60px;
+    box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
 }
 
 h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
     color: #333;
 }
 
-h2 {
-    margin-top: 20px;
+.input-container {
+    position: relative;
+    width: 100%;
+}
+
+input[type="text"] {
+    width: calc(100% - 50px); /* Adjusted for the icon width */
+    padding: 10px;
+    margin: 10px 0;
+    border: 2px solid #007BFF;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+    border-color: #0056b3;
+    outline: none;
+}
+
+.paste-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 18px;
+    color: #007BFF;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.paste-icon:hover {
+    color: #0056b3;
 }
 
 button {
-    background-color: #007bff;
+    padding: 10px 25px;
+    background-color: #007BFF;
     color: white;
     border: none;
-    padding: 10px 15px;
     border-radius: 5px;
+    font-size: 16px;
     cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
 button:hover {
     background-color: #0056b3;
+    transform: scale(1.05);
 }
 
-select {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+button:active {
+    transform: scale(0.95);
+}
+
+.error {
+    color: red;
+    margin-top: 15px;
+}
+
+.footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #555;
+}
+
+.fa {
+    margin-right: 5px;
 }
