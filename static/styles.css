@@ -31,8 +31,8 @@ h1 {
 }
 
 input[type="text"] {
-    width: calc(100% - 50px); /* Adjusted for the icon width */
-    padding: 10px;
+    width: calc(100% - 40px); /* Adjusted for the icon width */
+    padding: 10px 40px 10px 10px; /* Added padding for left and right */
     margin: 10px 0;
     border: 2px solid #007BFF;
     border-radius: 5px;
@@ -47,9 +47,10 @@ input[type="text"]:focus {
 
 .paste-icon {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 18px;
+    top: 50%; /* Center vertically */
+    right: 10px; /* Space from the right edge */
+    transform: translateY(-50%); /* Adjust for vertical centering */
+    font-size: 20px; /* Increase icon size */
     color: #007BFF;
     cursor: pointer;
     transition: color 0.3s;
