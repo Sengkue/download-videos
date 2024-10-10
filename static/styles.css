@@ -75,15 +75,6 @@ input[type="text"]:focus {
     color: #0056b3; /* Darker blue on hover */
 }
 
-.radio-group {
-    text-align: left;
-    margin: 10px 0;
-}
-
-.radio-group label {
-    margin-right: 15px;
-}
-
 button {
     padding: 10px 25px;
     background-color: #007BFF;

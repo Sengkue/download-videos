@@ -19,15 +19,15 @@
                 <i class="fas fa-paste paste-icon" onclick="pasteLink()" title="Paste URL"></i>
             </div>
             <br>
-            <div class="radio-group">
-                <label>
-                    <input type="radio" name="download_type" value="video" checked> Video
-                </label>
-                <label>
-                    <input type="radio" name="download_type" value="audio"> Audio
-                </label>
-            </div>
-            <br>
+            <label>
+                <input type="radio" name="download_type" value="video" checked>
+                Video
+            </label>
+            <label>
+                <input type="radio" name="download_type" value="audio">
+                Audio
+            </label>
+            <br><br>
             <button type="submit">Download</button>
         </form>
         {% if error %}
