@@ -16,6 +16,7 @@ def download():
     try:
         # Set the path to the local FFmpeg executable
         ffmpeg_path = os.path.join(os.getcwd(), 'ffmpeg', 'ffmpeg.exe')
+        print("FFmpeg path:", ffmpeg_path)  # Debugging line
 
         # Set the options for yt-dlp based on the selection
         if download_audio:
@@ -35,6 +36,10 @@ def download():
                 'format': 'bestvideo+bestaudio/best',
                 'outtmpl': '%(title)s.%(ext)s',
                 'merge_output_format': 'mp4',
+                'postprocessors': [{
+                    'key': 'FFmpegVideoMerge',
+                    'executable': ffmpeg_path,  # Specify the local FFmpeg executable
+                }],
                 'noplaylist': True,
             }
 
