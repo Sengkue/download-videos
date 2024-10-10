@@ -1,40 +1,51 @@
+<!-- Save this file as /templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download YouTube Video</title>
+    <title>YouTube Video Downloader</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f9f9f9;
-            text-align: center;
-            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
         .container {
             background-color: white;
-            padding: 30px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            display: inline-block;
+            padding: 30px 40px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
+            text-align: center;
         }
         input[type="text"] {
-            width: 300px;
+            width: 80%;
             padding: 10px;
-            margin: 10px;
-            border-radius: 5px;
+            margin: 15px 0;
             border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
         }
         button {
-            padding: 10px 20px;
+            padding: 10px 25px;
             background-color: #007BFF;
             color: white;
             border: none;
             border-radius: 5px;
+            font-size: 16px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         button:hover {
             background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -47,6 +58,10 @@
             <br>
             <button type="submit">Download</button>
         </form>
+        <!-- Optional: Display error messages -->
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
     </div>
 
 </body>
