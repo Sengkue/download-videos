@@ -1,9 +1,10 @@
+<!-- Save this file as /templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download YouTube Video</title>
+    <title>YouTube Video Downloader</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -42,23 +43,21 @@
         button:hover {
             background-color: #0056b3;
         }
-        .progress-bar {
+        .progress-container {
             width: 100%;
-            background-color: #f3f3f3;
-            border-radius: 10px;
-            margin: 20px 0;
-            display: none;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none; /* Hide initially */
         }
-        .progress-bar-fill {
+        .progress-bar {
             height: 20px;
+            width: 0%;
             background-color: #007BFF;
-            border-radius: 10px;
-            width: 0;
+            border-radius: 5px;
             text-align: center;
+            line-height: 20px;
             color: white;
-        }
-        .progress-text {
-            margin-top: 10px;
         }
     </style>
 </head>
@@ -66,65 +65,62 @@
 
     <div class="container">
         <h1>Download YouTube Video</h1>
-        <form id="downloadForm" action="/download" method="POST">
-            <input type="text" name="video_url" id="video_url" placeholder="Enter YouTube Video URL" required>
+        <form id="download-form" action="/download" method="POST">
+            <input type="text" name="video_url" placeholder="Enter YouTube Video URL" required>
             <br>
             <button type="submit">Download</button>
         </form>
-
-        <!-- Progress Bar -->
-        <div class="progress-bar">
-            <div class="progress-bar-fill" id="progress-bar-fill"></div>
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bar" id="progress-bar">0%</div>
         </div>
-        <div class="progress-text" id="progress-text"></div>
-
-        <!-- Error Message -->
-        <div id="error" style="color: red; display: none;"></div>
     </div>
 
     <script>
-        // Handle the form submission
-        document.getElementById('downloadForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Handle form submission
+        document.getElementById('download-form').onsubmit = function (event) {
+            event.preventDefault(); // Prevent form submission
 
-            const videoUrl = document.getElementById('video_url').value;
-            const formData = new FormData();
-            formData.append('video_url', videoUrl);
+            const url = event.target.video_url.value;
+            document.getElementById('progress-container').style.display = 'block'; // Show progress bar
+            document.getElementById('progress-bar').style.width = '0%'; // Reset progress bar
+            document.getElementById('progress-bar').textContent = '0%'; // Reset text
 
-            // Reset the progress bar and text
-            document.getElementById('progress-bar-fill').style.width = '0';
-            document.querySelector('.progress-bar').style.display = 'block';
-            document.getElementById('progress-text').textContent = 'Starting download...';
+            // Send the AJAX request to start the download
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/download', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    // Download started, start polling for progress
+                    checkProgress();
+                } else {
+                    alert('Error: ' + xhr.responseText);
+                }
+            };
+            xhr.send('video_url=' + encodeURIComponent(url));
+        };
 
-            // Start listening for progress updates via SSE
-            const eventSource = new EventSource('/stream');
+        // Function to check download progress
+        function checkProgress() {
+            const progressInterval = setInterval(function () {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', '/progress', true);
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        const progress = response.progress;
+                        document.getElementById('progress-bar').style.width = progress + '%';
+                        document.getElementById('progress-bar').textContent = progress + '%';
 
-            eventSource.addEventListener('progress', function(event) {
-                const data = JSON.parse(event.data);
-                const progress = data.progress;
-                
-                // Update progress bar
-                document.getElementById('progress-bar-fill').style.width = progress;
-                document.getElementById('progress-text').textContent = `Downloading: ${progress}`;
-            });
-
-            // Start the download request
-            fetch('/download', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                const downloadUrl = data.download_url;
-                window.location.href = downloadUrl; // Download the file
-                eventSource.close(); // Stop listening for progress updates
-            })
-            .catch(err => {
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = 'An error occurred. Please try again.';
-                eventSource.close(); // Stop listening for progress updates
-            });
-        });
+                        // If download is complete, stop checking
+                        if (progress >= 100) {
+                            clearInterval(progressInterval);
+                        }
+                    }
+                };
+                xhr.send();
+            }, 1000); // Check progress every second
+        }
     </script>
 
 </body>
