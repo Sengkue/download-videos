@@ -45,25 +45,10 @@ input[type="text"]:focus {
     outline: none;
 }
 
-.paste-icon {
-    position: absolute;
-    top: 50%; /* Center vertically */
-    right: 30px; /* Space from the right edge */
-    transform: translateY(-50%); /* Adjust for vertical centering */
-    font-size: 20px; /* Increase icon size */
-    color: #007BFF;
-    cursor: pointer;
-    transition: color 0.3s;
-}
-
-.paste-icon:hover {
-    color: #0056b3;
-}
-
 .clear-icon {
     position: absolute;
     top: 50%; /* Center vertically */
-    right: 10px; /* Space from the right edge */
+    left: 10px; /* Space from the left edge */
     transform: translateY(-50%); /* Adjust for vertical centering */
     font-size: 20px; /* Increase icon size */
     color: #FF0000; /* Red color for clear icon */
@@ -73,6 +58,21 @@ input[type="text"]:focus {
 
 .clear-icon:hover {
     color: #cc0000; /* Darker red on hover */
+}
+
+.paste-icon {
+    position: absolute;
+    top: 50%; /* Center vertically */
+    right: 10px; /* Space from the right edge */
+    transform: translateY(-50%); /* Adjust for vertical centering */
+    font-size: 20px; /* Increase icon size */
+    color: #007BFF;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.paste-icon:hover {
+    color: #0056b3;
 }
 
 button {
