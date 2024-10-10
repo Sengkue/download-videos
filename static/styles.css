@@ -47,7 +47,6 @@ input[type="text"]:focus {
 
 .clear-icon {
     position: absolute;
-    margin-right: 10px;
     top: 50%; /* Center vertically */
     right: 30px; /* Space from the right edge */
     transform: translateY(-50%); /* Adjust for vertical centering */
@@ -74,6 +73,11 @@ input[type="text"]:focus {
 
 .paste-icon:hover {
     color: #0056b3; /* Darker blue on hover */
+}
+
+.format-selection {
+    margin: 10px 0; /* Space between input and radio buttons */
+    text-align: left; /* Align radio buttons to the left */
 }
 
 button {
