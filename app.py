@@ -1,8 +1,6 @@
-# Save this file as app.py
-from flask import Flask, render_template, request, send_file, jsonify
+from flask import Flask, render_template, request, send_file, jsonify, after_this_request
 import os
 import tempfile
-import time
 from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError
 
@@ -71,6 +69,17 @@ def download_video():
             ydl_temp.download([video_url])
 
         # Send the file to the user
+        @after_this_request
+        def cleanup(response):
+            try:
+                if os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
+                if os.path.exists(temp_dir):
+                    os.rmdir(temp_dir)
+            except Exception as cleanup_error:
+                print(f"Cleanup Error: {cleanup_error}")
+            return response
+
         return send_file(
             temp_file_path,
             as_attachment=True,
@@ -84,15 +93,6 @@ def download_video():
     except Exception as e:
         print(f"Exception: {e}")
         return f"An unexpected error occurred: {e}", 500
-    finally:
-        # Clean up the temporary directory and file
-        try:
-            if os.path.exists(temp_file_path):
-                os.remove(temp_file_path)
-            if os.path.exists(temp_dir):
-                os.rmdir(temp_dir)
-        except Exception as cleanup_error:
-            print(f"Cleanup Error: {cleanup_error}")
 
 # Route to get the current download progress
 @app.route('/progress')
