@@ -15,32 +15,37 @@ def download():
     download_audio = request.form.get('download_type') == 'audio'  # Check if the audio option is selected
 
     try:
+        # Set the options for yt-dlp
         if download_audio:
-            # Download audio only
+            # Options for downloading audio
             ydl_opts = {
-                'format': 'bestaudio/best',
+                'format': 'bestaudio/best',  # Download best audio available
+                'outtmpl': '%(title)s.%(ext)s',  # Save with title as filename
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',  # Extract audio
-                    'preferredcodec': 'mp3',  # Convert to MP3
-                    'preferredquality': '192',
+                    'preferredcodec': 'mp3',  # Convert to mp3
+                    'preferredquality': '192',  # Set quality
                 }],
-                'outtmpl': '%(title)s.%(ext)s',  # Save with title as filename
+                'noplaylist': True,  # Download only single video
             }
         else:
-            # Download video
+            # Options for downloading video
             ydl_opts = {
-                'format': 'best',
+                'format': 'best',  # Download best video available
                 'outtmpl': '%(title)s.%(ext)s',  # Save with title as filename
+                'noplaylist': True,  # Download only single video
             }
 
-        # Use yt-dlp to download the video/audio
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(video_url, download=True)  # Download the file
+            info_dict = ydl.extract_info(video_url, download=False)  # Get video info
             title = info_dict.get('title', None)
+            ydl.download([video_url])  # Download the video/audio
 
-        # Determine the correct filename based on whether we downloaded audio or video
-        file_extension = 'mp3' if download_audio else 'mp4'
-        filename = f"{title}.{file_extension}"
+        # Return the appropriate file after download
+        if download_audio:
+            filename = f"{title}.mp3"
+        else:
+            filename = f"{title}.mp4"
 
         return send_file(filename, as_attachment=True)
 
