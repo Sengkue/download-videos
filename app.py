@@ -1,7 +1,6 @@
-# Save this file as app.py
+import os
 from flask import Flask, render_template, request, send_file
 import yt_dlp
-import os
 
 app = Flask(__name__)
 
@@ -12,41 +11,40 @@ def index():
 @app.route('/download', methods=['POST'])
 def download():
     video_url = request.form['video_url']
-    download_audio = request.form.get('download_type') == 'audio'  # Check if the audio option is selected
+    download_audio = request.form.get('download_type') == 'audio'  # Check if audio is selected
 
     try:
-        # Set the options for yt-dlp
+        # Set the path to the local FFmpeg executable
+        ffmpeg_path = os.path.join(os.getcwd(), 'ffmpeg', 'ffmpeg.exe')
+
+        # Set the options for yt-dlp based on the selection
         if download_audio:
-            # Options for downloading audio
             ydl_opts = {
-                'format': 'bestaudio/best',  # Download best audio available
-                'outtmpl': '%(title)s.%(ext)s',  # Save with title as filename
+                'format': 'bestaudio/best',
+                'outtmpl': '%(title)s.%(ext)s',
                 'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',  # Extract audio
-                    'preferredcodec': 'mp3',  # Convert to mp3
-                    'preferredquality': '192',  # Set quality
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                    'executable': ffmpeg_path,  # Specify the local FFmpeg executable
                 }],
-                'noplaylist': True,  # Download only single video
+                'noplaylist': True,
             }
         else:
-            # Options for downloading video
             ydl_opts = {
-                'format': 'best',  # Download best video available
-                'outtmpl': '%(title)s.%(ext)s',  # Save with title as filename
-                'noplaylist': True,  # Download only single video
+                'format': 'bestvideo+bestaudio/best',
+                'outtmpl': '%(title)s.%(ext)s',
+                'merge_output_format': 'mp4',
+                'noplaylist': True,
             }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(video_url, download=False)  # Get video info
+            info_dict = ydl.extract_info(video_url, download=False)
             title = info_dict.get('title', None)
             ydl.download([video_url])  # Download the video/audio
 
         # Return the appropriate file after download
-        if download_audio:
-            filename = f"{title}.mp3"
-        else:
-            filename = f"{title}.mp4"
-
+        filename = f"{title}.mp3" if download_audio else f"{title}.mp4"
         return send_file(filename, as_attachment=True)
 
     except Exception as e:
