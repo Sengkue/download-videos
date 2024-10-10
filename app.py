@@ -1,9 +1,7 @@
-# Save this file as app.py
 from flask import Flask, render_template, request, send_file
 from pytube import YouTube
 import os
-from urllib.parse import urlparse
-from pytube.exceptions import VideoUnavailable
+from urllib.parse import urlparse, parse_qs
 
 app = Flask(__name__)
 
@@ -14,13 +12,18 @@ DOWNLOAD_FOLDER = 'downloads'
 if not os.path.exists(DOWNLOAD_FOLDER):
     os.makedirs(DOWNLOAD_FOLDER)
 
-# Function to check if a URL is valid
-def is_valid_url(url):
-    try:
-        result = urlparse(url)
-        return all([result.scheme, result.netloc, result.path])
-    except:
-        return False
+# Function to clean and validate the URL
+def clean_url(url):
+    parsed_url = urlparse(url)
+    # If the URL is from youtu.be, convert to full youtube URL
+    if 'youtu.be' in parsed_url.netloc:
+        video_id = parsed_url.path[1:]  # Extract the video ID from the path
+        return f'https://www.youtube.com/watch?v={video_id}'
+    # If there are query params (e.g. "?si="), remove them
+    elif 'youtube.com' in parsed_url.netloc:
+        query = parse_qs(parsed_url.query)
+        return f'https://www.youtube.com/watch{parsed_url.path}'
+    return url
 
 # Home route to render the HTML form
 @app.route('/')
@@ -32,13 +35,12 @@ def index():
 def download_video():
     video_url = request.form['video_url']
 
-    # Validate the URL format
-    if not is_valid_url(video_url) or "youtube.com" not in video_url:
-        return "Invalid YouTube URL. Please check and try again."
+    # Clean the URL before processing
+    clean_video_url = clean_url(video_url)
 
     try:
-        # Attempt to create a YouTube object
-        yt = YouTube(video_url)
+        # Attempt to create a YouTube object with cleaned URL
+        yt = YouTube(clean_video_url)
 
         # Fetch the highest resolution stream
         stream = yt.streams.filter(progressive=True).first()
@@ -56,12 +58,9 @@ def download_video():
         # Send the file for download
         return send_file(file_path, as_attachment=True)
 
-    except VideoUnavailable:
-        return "The video is unavailable. Please check the URL."
     except Exception as e:
         print(f"Error: {e}")
         return f"Error downloading the video: {e}. Please check the URL or try again later."
 
-# Run the Flask app
 if __name__ == '__main__':
     app.run(debug=True)
