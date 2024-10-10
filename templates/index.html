@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Download YouTube Video</title>
     <style>
-        /* Your styles remain unchanged */
+        body { font-family: Arial, sans-serif; }
+        .container { width: 50%; margin: auto; padding: 20px; }
+        .progress-bar { width: 100%; background: #eee; border-radius: 5px; margin-top: 20px; }
+        .progress-bar-fill { height: 20px; width: 0; background: green; border-radius: 5px; transition: width 0.4s; }
     </style>
 </head>
 <body>
@@ -18,31 +21,24 @@
             <button type="submit">Download</button>
         </form>
 
-        <!-- Progress Bar -->
         <div class="progress-bar">
             <div class="progress-bar-fill" id="progress-bar-fill"></div>
         </div>
         <div class="progress-text" id="progress-text"></div>
-
-        <!-- Error Message -->
         <div id="error" style="color: red; display: none;"></div>
     </div>
 
     <script>
-        // Handle the form submission
         document.getElementById('downloadForm').addEventListener('submit', function(e) {
             e.preventDefault();
-
             const videoUrl = document.getElementById('video_url').value;
             const formData = new FormData();
             formData.append('video_url', videoUrl);
 
-            // Reset the progress bar and text
             document.getElementById('progress-bar-fill').style.width = '0';
             document.querySelector('.progress-bar').style.display = 'block';
             document.getElementById('progress-text').textContent = 'Starting download...';
 
-            // Start the download request
             fetch('/download', {
                 method: 'POST',
                 body: formData
@@ -50,7 +46,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === "Download started") {
-                    // Polling for progress
                     const interval = setInterval(function() {
                         fetch('/progress')
                         .then(response => response.json())

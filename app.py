@@ -4,25 +4,38 @@ from yt_dlp import YoutubeDL
 import os
 import tempfile
 import threading
+import redis
 
 app = Flask(__name__)
 
-# Global variable to store progress information
-progress_data = {"progress": 0}
+# Connect to Redis
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 
-def download_hook(d):
-    if d['status'] == 'downloading':
-        # Extract percentage and update global progress_data
-        progress = d['_percent_str'].strip()
-        progress_data['progress'] = progress
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/download', methods=['POST'])
+def download_video():
+    video_url = request.form.get('video_url', '').strip()
+
+    # Validate the URL
+    if not video_url.startswith('http'):
+        return "Invalid YouTube URL. Please check and try again.", 400
+
+    # Start a new thread for downloading the video
+    thread = threading.Thread(target=video_download_thread, args=(video_url,))
+    thread.start()
+
+    return jsonify({"status": "Download started"}), 200
 
 def video_download_thread(video_url):
-    global progress_data
-    # yt-dlp options for downloading the best quality video
+    # Set progress to 0 in Redis
+    redis_client.set('download_progress', 0)
+
     ydl_opts = {
         'format': 'best',
         'noplaylist': True,
-        'quiet': True,
         'progress_hooks': [download_hook],
     }
 
@@ -42,30 +55,19 @@ def video_download_thread(video_url):
         # Download the video
         ydl.download([video_url])
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+        # Save the file in Redis
+        redis_client.set('download_progress', 100)
 
-@app.route('/download', methods=['POST'])
-def download_video():
-    video_url = request.form.get('video_url', '').strip()
-
-    # Validate the URL
-    if not video_url.startswith('http'):
-        return "Invalid YouTube URL. Please check and try again.", 400
-
-    global progress_data
-    progress_data['progress'] = 0
-
-    # Start a new thread for downloading the video
-    thread = threading.Thread(target=video_download_thread, args=(video_url,))
-    thread.start()
-
-    return jsonify({"status": "Download started"}), 200
+def download_hook(d):
+    if d['status'] == 'downloading':
+        # Update progress in Redis
+        progress = d['_percent_str'].strip()
+        redis_client.set('download_progress', progress)
 
 @app.route('/progress', methods=['GET'])
 def get_progress():
-    return jsonify(progress_data)
+    progress = redis_client.get('download_progress')
+    return jsonify({"progress": progress.decode('utf-8') if progress else 0})
 
 if __name__ == '__main__':
     app.run(debug=True)
