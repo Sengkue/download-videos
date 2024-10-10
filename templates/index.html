@@ -14,9 +14,9 @@
         <h1><i class="fas fa-download"></i> Download YouTube Video</h1>
         <form action="/download" method="POST">
             <div class="input-container">
-                <input type="text" id="video-url" name="video_url" placeholder="Enter YouTube Video URL" required>
+                <input type="text" id="video-url" name="video_url" placeholder="Enter YouTube Video URL" required oninput="toggleClearIcon()">
                 <i class="fas fa-paste paste-icon" onclick="pasteLink()" title="Paste URL"></i>
-                <i class="fas fa-times clear-icon" onclick="clearInput()" title="Clear Input"></i>
+                <i class="fas fa-times clear-icon" onclick="clearInput()" title="Clear Input" style="display: none;"></i>
             </div>
             <br>
             <button type="submit">Download</button>
