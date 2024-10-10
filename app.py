@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, send_file, jsonify, after_this_request
+# Save this file as app.py
+from flask import Flask, render_template, request, send_file, abort
 import os
 import tempfile
 from yt_dlp import YoutubeDL
@@ -6,18 +7,9 @@ from yt_dlp.utils import DownloadError
 
 app = Flask(__name__)
 
-# Initialize a global variable to hold the download progress
-download_progress = 0
-
 # Function to validate YouTube URLs
 def is_valid_youtube_url(url):
     return "youtube.com/watch" in url or "youtu.be/" in url
-
-# Function to update the progress
-def progress_hook(d):
-    global download_progress
-    if d['status'] == 'downloading':
-        download_progress = int(d['downloaded_bytes'] / d['total_bytes'] * 100)
 
 # Home route to render the HTML form
 @app.route('/')
@@ -27,11 +19,7 @@ def index():
 # Route to handle the video download request
 @app.route('/download', methods=['POST'])
 def download_video():
-    global download_progress
     video_url = request.form.get('video_url', '').strip()
-    
-    # Reset the progress
-    download_progress = 0
 
     # Validate the URL
     if not is_valid_youtube_url(video_url):
@@ -41,12 +29,11 @@ def download_video():
         # yt-dlp options for downloading the best quality video
         ydl_opts = {
             'format': 'best',
-            'noplaylist': True,
-            'quiet': True,
+            'noplaylist': True,  # Disable playlist downloading
+            'quiet': True,       # Suppress yt-dlp output
             'no_warnings': True,
-            'restrictfilenames': True,
-            'outtmpl': '%(title)s.%(ext)s',
-            'progress_hooks': [progress_hook],  # Set the progress hook
+            'restrictfilenames': True,  # Restrict filenames to ASCII characters
+            'outtmpl': '%(title)s.%(ext)s',  # Template for output filename
         }
 
         with YoutubeDL(ydl_opts) as ydl:
@@ -69,17 +56,6 @@ def download_video():
             ydl_temp.download([video_url])
 
         # Send the file to the user
-        @after_this_request
-        def cleanup(response):
-            try:
-                if os.path.exists(temp_file_path):
-                    os.remove(temp_file_path)
-                if os.path.exists(temp_dir):
-                    os.rmdir(temp_dir)
-            except Exception as cleanup_error:
-                print(f"Cleanup Error: {cleanup_error}")
-            return response
-
         return send_file(
             temp_file_path,
             as_attachment=True,
@@ -93,11 +69,15 @@ def download_video():
     except Exception as e:
         print(f"Exception: {e}")
         return f"An unexpected error occurred: {e}", 500
-
-# Route to get the current download progress
-@app.route('/progress')
-def get_progress():
-    return jsonify(progress=download_progress)
+    finally:
+        # Clean up the temporary directory and file
+        try:
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+            if os.path.exists(temp_dir):
+                os.rmdir(temp_dir)
+        except Exception as cleanup_error:
+            print(f"Cleanup Error: {cleanup_error}")
 
 if __name__ == '__main__':
     app.run(debug=True)

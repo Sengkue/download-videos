@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Video Downloader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -17,18 +18,30 @@
         }
         .container {
             background-color: white;
-            padding: 30px 40px;
-            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
+            padding: 40px 60px;
+            box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
             text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
         }
         input[type="text"] {
-            width: 80%;
+            width: calc(100% - 22px);
             padding: 10px;
-            margin: 15px 0;
-            border: 1px solid #ccc;
+            margin: 10px 0;
+            border: 2px solid #007BFF;
             border-radius: 5px;
             font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: #0056b3;
+            outline: none;
         }
         button {
             padding: 10px 25px;
@@ -38,90 +51,43 @@
             border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s, transform 0.2s;
         }
         button:hover {
             background-color: #0056b3;
+            transform: scale(1.05);
         }
-        .progress-container {
-            width: 100%;
-            background-color: #ddd;
-            border-radius: 5px;
+        button:active {
+            transform: scale(0.95);
+        }
+        .error {
+            color: red;
+            margin-top: 15px;
+        }
+        .footer {
             margin-top: 20px;
-            display: none; /* Hide initially */
+            font-size: 12px;
+            color: #555;
         }
-        .progress-bar {
-            height: 20px;
-            width: 0%;
-            background-color: #007BFF;
-            border-radius: 5px;
-            text-align: center;
-            line-height: 20px;
-            color: white;
+        .fa {
+            margin-right: 5px;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Download YouTube Video</h1>
-        <form id="download-form" action="/download" method="POST">
+        <h1><i class="fas fa-download"></i> Download YouTube Video</h1>
+        <form action="/download" method="POST">
             <input type="text" name="video_url" placeholder="Enter YouTube Video URL" required>
             <br>
             <button type="submit">Download</button>
         </form>
-        <div class="progress-container" id="progress-container">
-            <div class="progress-bar" id="progress-bar">0%</div>
-        </div>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        <div class="footer">Powered by <a href="https://yt-dlp.org/" target="_blank">yt-dlp</a></div>
     </div>
-
-    <script>
-        // Handle form submission
-        document.getElementById('download-form').onsubmit = function (event) {
-            event.preventDefault(); // Prevent form submission
-
-            const url = event.target.video_url.value;
-            document.getElementById('progress-container').style.display = 'block'; // Show progress bar
-            document.getElementById('progress-bar').style.width = '0%'; // Reset progress bar
-            document.getElementById('progress-bar').textContent = '0%'; // Reset text
-
-            // Send the AJAX request to start the download
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/download', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    // Download started, start polling for progress
-                    checkProgress();
-                } else {
-                    alert('Error: ' + xhr.responseText);
-                }
-            };
-            xhr.send('video_url=' + encodeURIComponent(url));
-        };
-
-        // Function to check download progress
-        function checkProgress() {
-            const progressInterval = setInterval(function () {
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', '/progress', true);
-                xhr.onload = function () {
-                    if (xhr.status === 200) {
-                        const response = JSON.parse(xhr.responseText);
-                        const progress = response.progress;
-                        document.getElementById('progress-bar').style.width = progress + '%';
-                        document.getElementById('progress-bar').textContent = progress + '%';
-
-                        // If download is complete, stop checking
-                        if (progress >= 100) {
-                            clearInterval(progressInterval);
-                        }
-                    }
-                };
-                xhr.send();
-            }, 1000); // Check progress every second
-        }
-    </script>
 
 </body>
 </html>
