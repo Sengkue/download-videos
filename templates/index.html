@@ -14,8 +14,8 @@
         <h1><i class="fas fa-download"></i> Download YouTube Video</h1>
         <form action="/download" method="POST">
             <div class="input-container">
-                <i class="fas fa-times clear-icon" onclick="clearInput()" title="Clear Input" style="display: none;"></i>
                 <input type="text" id="video-url" name="video_url" placeholder="Enter YouTube Video URL" required oninput="toggleClearIcon()">
+                <i class="fas fa-times clear-icon" onclick="clearInput()" title="Clear Input" style="display: none;"></i>
                 <i class="fas fa-paste paste-icon" onclick="pasteLink()" title="Paste URL"></i>
             </div>
             <br>
@@ -24,7 +24,7 @@
         {% if error %}
             <div class="error">{{ error }}</div>
         {% endif %}
-        <div class="footer">Powered by <a href="https://yt-dlp.org/" target="_blank">yt-dlp</a></div>
+        <!-- <div class="footer">Powered by <a href="https://yt-dlp.org/" target="_blank">yt-dlp</a></div> -->
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
