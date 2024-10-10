@@ -6,3 +6,7 @@ function pasteLink() {
         console.error('Failed to read clipboard: ', err);
     });
 }
+
+function clearInput() {
+    document.getElementById('video-url').value = ''; // Clear the input field
+}
