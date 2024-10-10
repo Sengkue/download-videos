@@ -47,6 +47,7 @@ input[type="text"]:focus {
 
 .clear-icon {
     position: absolute;
+    margin-right: 5px;
     top: 50%; /* Center vertically */
     right: 30px; /* Space from the right edge */
     transform: translateY(-50%); /* Adjust for vertical centering */
